@@ -2,7 +2,8 @@
 /**
  * WP Media Cleaner - Uninstall
  *
- * Ruimt alle plugin-data op wanneer de plugin wordt verwijderd.
+ * Ruimt plugin-data op wanneer de plugin wordt verwijderd.
+ * De map 'te-beoordelen' wordt NIET verwijderd als er nog bestanden in staan.
  */
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -15,36 +16,33 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-logger.php';
 // Drop the log table.
 WMC_Logger::drop_table();
 
-// Remove the review directory and all contents.
+// Remove stored options.
+delete_option( 'wmc_unattached_items' );
+
+// Only remove the review directory if it is empty (no media files left).
 $upload_dir  = wp_upload_dir();
 $review_path = trailingslashit( $upload_dir['basedir'] ) . 'te-beoordelen';
 
 if ( is_dir( $review_path ) ) {
-    wmc_remove_directory( $review_path );
-}
-
-/**
- * Recursively remove a directory and its contents.
- *
- * @param string $dir Directory path.
- */
-function wmc_remove_directory( $dir ) {
-    if ( ! is_dir( $dir ) ) {
-        return;
-    }
-
-    $items = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator( $dir, RecursiveDirectoryIterator::SKIP_DOTS ),
-        RecursiveIteratorIterator::CHILD_FIRST
+    $has_files = false;
+    $iterator  = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator( $review_path, RecursiveDirectoryIterator::SKIP_DOTS )
     );
 
-    foreach ( $items as $item ) {
-        if ( $item->isDir() ) {
-            rmdir( $item->getPathname() );
-        } else {
-            unlink( $item->getPathname() );
+    foreach ( $iterator as $item ) {
+        if ( $item->isFile() && $item->getBasename() !== '.htaccess' ) {
+            $has_files = true;
+            break;
         }
     }
 
-    rmdir( $dir );
+    // Only remove if no media files remain.
+    if ( ! $has_files ) {
+        // Remove .htaccess and empty subdirectories.
+        $htaccess = trailingslashit( $review_path ) . '.htaccess';
+        if ( file_exists( $htaccess ) ) {
+            unlink( $htaccess );
+        }
+        @rmdir( $review_path );
+    }
 }
