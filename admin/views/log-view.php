@@ -3,7 +3,12 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only navigation parameters validated against allowlist.
 $current_action = isset( $_GET['log_action'] ) ? sanitize_text_field( $_GET['log_action'] ) : '';
+if ( ! in_array( $current_action, array( '', 'scan', 'move', 'restore', 'delete', 'download' ), true ) ) {
+    $current_action = '';
+}
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $paged          = isset( $_GET['paged'] ) ? max( 1, intval( $_GET['paged'] ) ) : 1;
 $per_page       = 50;
 $offset         = ( $paged - 1 ) * $per_page;

@@ -6,6 +6,48 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WMC_Mover {
 
     /**
+     * Validate that a resolved path stays within an expected base directory.
+     *
+     * @param string $path     The path to validate.
+     * @param string $base_dir The base directory it must stay within.
+     * @return string|false The validated real path, or false if invalid.
+     */
+    public static function validate_path( $path, $base_dir ) {
+        $real_base = realpath( $base_dir );
+        if ( ! $real_base ) {
+            return false;
+        }
+
+        $real_path = realpath( $path );
+        if ( ! $real_path ) {
+            return false;
+        }
+
+        if ( strpos( $real_path, $real_base . DIRECTORY_SEPARATOR ) !== 0 && $real_path !== $real_base ) {
+            return false;
+        }
+
+        return $real_path;
+    }
+
+    /**
+     * Validate a relative path does not contain directory traversal sequences.
+     *
+     * @param string $relative_path The relative path to validate.
+     * @return bool True if safe, false if it contains traversal.
+     */
+    public static function is_safe_path( $relative_path ) {
+        $normalized = str_replace( '\\', '/', $relative_path );
+        if ( strpos( $normalized, '..' ) !== false ) {
+            return false;
+        }
+        if ( strpos( $normalized, '/' ) === 0 ) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Move a file from uploads to the review directory.
      * Preserves the original subdirectory structure (year/month).
      *
@@ -13,12 +55,22 @@ class WMC_Mover {
      * @return bool True on success.
      */
     public static function move_to_review( $relative_path ) {
+        if ( ! self::is_safe_path( $relative_path ) ) {
+            return false;
+        }
+
         $upload_dir  = wp_upload_dir();
         $basedir     = trailingslashit( $upload_dir['basedir'] );
         $source      = $basedir . $relative_path;
         $destination = $basedir . WMC_REVIEW_DIR . '/' . $relative_path;
 
-        if ( ! file_exists( $source ) ) {
+        // Validate source path stays within uploads.
+        $validated_source = self::validate_path( $source, $upload_dir['basedir'] );
+        if ( ! $validated_source ) {
+            return false;
+        }
+
+        if ( ! file_exists( $validated_source ) ) {
             return false;
         }
 
@@ -67,12 +119,23 @@ class WMC_Mover {
      * @return bool True on success.
      */
     public static function restore( $relative_path ) {
+        if ( ! self::is_safe_path( $relative_path ) ) {
+            return false;
+        }
+
         $upload_dir  = wp_upload_dir();
         $basedir     = trailingslashit( $upload_dir['basedir'] );
-        $source      = $basedir . WMC_REVIEW_DIR . '/' . $relative_path;
+        $review_root = $basedir . WMC_REVIEW_DIR;
+        $source      = $review_root . '/' . $relative_path;
         $destination = $basedir . $relative_path;
 
-        if ( ! file_exists( $source ) ) {
+        // Validate source stays within review directory.
+        $validated_source = self::validate_path( $source, $review_root );
+        if ( ! $validated_source ) {
+            return false;
+        }
+
+        if ( ! file_exists( $validated_source ) ) {
             return false;
         }
 
@@ -138,14 +201,20 @@ class WMC_Mover {
      * @return string
      */
     public static function get_review_file_size( $relative_path ) {
-        $upload_dir = wp_upload_dir();
-        $file       = trailingslashit( $upload_dir['basedir'] ) . WMC_REVIEW_DIR . '/' . $relative_path;
-
-        if ( ! file_exists( $file ) ) {
+        if ( ! self::is_safe_path( $relative_path ) ) {
             return '0 B';
         }
 
-        return size_format( filesize( $file ) );
+        $upload_dir  = wp_upload_dir();
+        $review_root = trailingslashit( $upload_dir['basedir'] ) . WMC_REVIEW_DIR;
+        $file        = $review_root . '/' . $relative_path;
+
+        $validated = self::validate_path( $file, $review_root );
+        if ( ! $validated || ! file_exists( $validated ) ) {
+            return '0 B';
+        }
+
+        return size_format( filesize( $validated ) );
     }
 
     /**

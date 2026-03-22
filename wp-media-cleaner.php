@@ -3,7 +3,7 @@
  * Plugin Name: WP Media Cleaner
  * Plugin URI:  https://github.com/tonvanderkolk/wp-media-cleaner
  * Description: Scant de uploads-map op ongebruikte bestanden en verplaatst ze naar een beoordelingsmap.
- * Version:     1.1.0
+ * Version:     1.2.0
  * Author:      TvdK Apps
  * Author URI:  https://tvdk.nl
  * License:     GPL-2.0-or-later
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-define( 'WMC_VERSION', '1.1.0' );
+define( 'WMC_VERSION', '1.2.0' );
 define( 'WMC_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'WMC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WMC_REVIEW_DIR', 'te-beoordelen' );

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0 — 2026-03-22
+
+### Beveiligd
+- Path traversal preventie: alle bestandsoperaties valideren nu dat paden binnen de verwachte directory blijven
+- Zip-bestanden gebruiken nu onvoorspelbare bestandsnamen (voorkomt race condition)
+- GET-parameters gevalideerd tegen allowlists (tab, log_action)
+- Uninstall bewaart de te-beoordelen map als deze niet leeg is
+
 ## 1.1.0 — 2026-03-22
 
 ### Verbeterd

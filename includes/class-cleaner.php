@@ -12,14 +12,20 @@ class WMC_Cleaner {
      * @return bool True on success.
      */
     public static function delete_file( $relative_path ) {
-        $upload_dir = wp_upload_dir();
-        $file       = trailingslashit( $upload_dir['basedir'] ) . WMC_REVIEW_DIR . '/' . $relative_path;
-
-        if ( ! file_exists( $file ) ) {
+        if ( ! WMC_Mover::is_safe_path( $relative_path ) ) {
             return false;
         }
 
-        $deleted = unlink( $file );
+        $upload_dir  = wp_upload_dir();
+        $review_root = trailingslashit( $upload_dir['basedir'] ) . WMC_REVIEW_DIR;
+        $file        = $review_root . '/' . $relative_path;
+
+        $validated = WMC_Mover::validate_path( $file, $review_root );
+        if ( ! $validated || ! file_exists( $validated ) ) {
+            return false;
+        }
+
+        $deleted = unlink( $validated );
 
         if ( $deleted ) {
             WMC_Logger::log( 'delete', $relative_path, 'Definitief verwijderd.' );
@@ -67,8 +73,9 @@ class WMC_Cleaner {
         }
 
         $upload_dir  = wp_upload_dir();
-        $review_base = trailingslashit( $upload_dir['basedir'] ) . WMC_REVIEW_DIR . '/';
-        $zip_file    = trailingslashit( $upload_dir['basedir'] ) . 'wmc-download-' . time() . '.zip';
+        $review_root = trailingslashit( $upload_dir['basedir'] ) . WMC_REVIEW_DIR;
+        $review_base = $review_root . '/';
+        $zip_file    = trailingslashit( $upload_dir['basedir'] ) . 'wmc-download-' . wp_generate_password( 16, false ) . '.zip';
 
         $zip = new ZipArchive();
         if ( $zip->open( $zip_file, ZipArchive::CREATE ) !== true ) {
@@ -77,9 +84,13 @@ class WMC_Cleaner {
 
         $added = 0;
         foreach ( $relative_paths as $relative_path ) {
+            if ( ! WMC_Mover::is_safe_path( $relative_path ) ) {
+                continue;
+            }
             $full_path = $review_base . $relative_path;
-            if ( file_exists( $full_path ) ) {
-                $zip->addFile( $full_path, $relative_path );
+            $validated = WMC_Mover::validate_path( $full_path, $review_root );
+            if ( $validated && file_exists( $validated ) ) {
+                $zip->addFile( $validated, $relative_path );
                 $added++;
             }
         }

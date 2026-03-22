@@ -58,7 +58,11 @@ class WMC_Admin_Page {
             wp_die( 'Geen toegang.' );
         }
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- tab is a navigation parameter, validated against allowlist below.
         $tab = isset( $_GET['tab'] ) ? sanitize_text_field( $_GET['tab'] ) : 'scan';
+        if ( ! in_array( $tab, array( 'scan', 'review', 'log' ), true ) ) {
+            $tab = 'scan';
+        }
         ?>
         <div class="wrap">
             <h1>WP Media Cleaner</h1>
