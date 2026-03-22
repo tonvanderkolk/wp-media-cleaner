@@ -1,0 +1,110 @@
+/* WP Media Cleaner - Admin Styles */
+
+.wmc-panel {
+    margin-top: 15px;
+}
+
+.wmc-panel h2 {
+    margin-top: 0;
+}
+
+/* Bulk actions bar */
+.wmc-bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    flex-wrap: wrap;
+}
+
+.wmc-bulk-actions-bottom {
+    border-top: 1px solid #c3c4c7;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+.wmc-selected-count {
+    color: #646970;
+    font-style: italic;
+    margin-right: 10px;
+}
+
+/* Review table */
+.wmc-review-table .check-column {
+    width: 30px;
+    padding: 8px 10px;
+}
+
+.wmc-col-size {
+    width: 100px;
+}
+
+/* Log view */
+.wmc-col-date {
+    width: 160px;
+}
+
+.wmc-col-action {
+    width: 100px;
+}
+
+.wmc-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    text-transform: capitalize;
+}
+
+.wmc-badge-scan {
+    background: #2271b1;
+}
+
+.wmc-badge-move {
+    background: #dba617;
+    color: #1d2327;
+}
+
+.wmc-badge-restore {
+    background: #00a32a;
+}
+
+.wmc-badge-delete {
+    background: #d63638;
+}
+
+.wmc-badge-download {
+    background: #72aee6;
+}
+
+/* Log filters */
+.wmc-log-filters {
+    margin-bottom: 15px;
+}
+
+.wmc-log-filters a {
+    text-decoration: none;
+}
+
+.wmc-log-filters a.current {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+/* Clear log form */
+.wmc-clear-log-form {
+    margin-top: 15px;
+}
+
+/* Inline notices */
+.notice.inline {
+    margin: 10px 0;
+}
+
+/* Scan button loading state */
+.wmc-scanning .button-hero {
+    opacity: 0.7;
+    pointer-events: none;
+}
