@@ -1,6 +1,7 @@
 <?php
 /**
  * Plugin Name: WP Media Cleaner
+ * Plugin URI:  https://github.com/tonvanderkolk/wp-media-cleaner
  * Description: Scant de uploads-map op ongebruikte bestanden en verplaatst ze naar een beoordelingsmap.
  * Version:     1.1.0
  * Author:      TvdK Apps
