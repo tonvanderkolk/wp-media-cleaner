@@ -72,6 +72,28 @@ class WMC_Scanner {
     );
 
     /**
+     * Get all excluded directories: hardcoded defaults merged with user-defined.
+     *
+     * @return array
+     */
+    public static function get_all_excluded_dirs() {
+        $custom = get_option( 'wmc_custom_excluded_dirs', array() );
+        if ( ! is_array( $custom ) ) {
+            $custom = array();
+        }
+        return array_unique( array_merge( self::$excluded_dirs, $custom ) );
+    }
+
+    /**
+     * Get the hardcoded default excluded directories.
+     *
+     * @return array
+     */
+    public static function get_default_excluded_dirs() {
+        return self::$excluded_dirs;
+    }
+
+    /**
      * Constructor.
      */
     public function __construct() {
@@ -281,9 +303,10 @@ class WMC_Scanner {
             )
         );
 
-        // Build list of absolute excluded directory paths.
+        // Build list of absolute excluded directory paths (hardcoded + user-defined).
+        $all_excluded = self::get_all_excluded_dirs();
         $excluded_paths = array();
-        foreach ( self::$excluded_dirs as $dir ) {
+        foreach ( $all_excluded as $dir ) {
             $excluded_paths[] = trailingslashit( $this->upload_basedir . $dir );
         }
 

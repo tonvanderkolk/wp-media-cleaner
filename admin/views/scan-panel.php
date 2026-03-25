@@ -8,6 +8,7 @@ if ( $scan_result !== false ) {
     delete_transient( 'wmc_scan_result' );
 }
 
+$settings_saved = isset( $_GET['saved'] ) && $_GET['saved'] === '1'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $review_files = WMC_Mover::get_review_files();
 $review_count = count( $review_files );
 $review_size  = WMC_Mover::get_review_total_size();
@@ -20,6 +21,12 @@ $review_size  = WMC_Mover::get_review_total_size();
         Ongebruikte bestanden worden verplaatst naar de map <code>te-beoordelen</code>
         waar je ze kunt bekijken voordat je ze verwijdert.
     </p>
+
+    <?php if ( $settings_saved ) : ?>
+        <div class="notice notice-success inline">
+            <p>Uitgesloten mappen opgeslagen.</p>
+        </div>
+    <?php endif; ?>
 
     <?php if ( $scan_result !== false ) : ?>
         <div class="notice notice-success inline">
@@ -49,6 +56,38 @@ $review_size  = WMC_Mover::get_review_total_size();
                 Scan starten
             </button>
         </p>
+    </form>
+
+    <hr>
+
+    <h3>Uitgesloten mappen</h3>
+    <p>
+        Voeg hier submappen van <code>wp-content/uploads/</code> toe die de scanner moet overslaan.
+        Eén mapnaam per regel. Standaard plugin-mappen worden altijd overgeslagen.
+    </p>
+    <form method="post">
+        <?php wp_nonce_field( 'wmc_settings_nonce' ); ?>
+        <input type="hidden" name="wmc_action" value="save_excluded_dirs">
+        <?php
+        $custom_dirs = get_option( 'wmc_custom_excluded_dirs', array() );
+        $custom_text = is_array( $custom_dirs ) ? implode( "\n", $custom_dirs ) : '';
+        ?>
+        <textarea name="wmc_custom_excluded_dirs" rows="5" class="large-text code" placeholder="bijv. mm-artiesten&#10;mm-intake"><?php echo esc_textarea( $custom_text ); ?></textarea>
+        <p>
+            <button type="submit" class="button">Opslaan</button>
+        </p>
+        <?php
+        $defaults = WMC_Scanner::get_default_excluded_dirs();
+        if ( ! empty( $defaults ) ) : ?>
+            <details>
+                <summary>Standaard uitgesloten mappen (<?php echo count( $defaults ); ?>)</summary>
+                <ul style="margin-top: 0.5em;">
+                    <?php foreach ( $defaults as $dir ) : ?>
+                        <li><code><?php echo esc_html( $dir ); ?></code></li>
+                    <?php endforeach; ?>
+                </ul>
+            </details>
+        <?php endif; ?>
     </form>
 
     <hr>

@@ -218,6 +218,30 @@ class WMC_Admin_Page {
             exit;
         }
 
+        // Handle save excluded directories.
+        if ( isset( $_POST['wmc_action'] ) && $_POST['wmc_action'] === 'save_excluded_dirs' ) {
+            check_admin_referer( 'wmc_settings_nonce' );
+
+            $raw   = isset( $_POST['wmc_custom_excluded_dirs'] ) ? sanitize_textarea_field( $_POST['wmc_custom_excluded_dirs'] ) : '';
+            $lines = array_filter( array_map( 'trim', explode( "\n", $raw ) ) );
+
+            // Sanitize: remove slashes, dots, and empty entries.
+            $clean = array();
+            foreach ( $lines as $line ) {
+                $line = str_replace( array( '\\', '..', '/' ), array( '', '', '' ), $line );
+                $line = sanitize_file_name( $line );
+                if ( ! empty( $line ) ) {
+                    $clean[] = $line;
+                }
+            }
+
+            update_option( 'wmc_custom_excluded_dirs', array_unique( $clean ), false );
+
+            set_transient( 'wmc_settings_saved', true, 60 );
+            wp_safe_redirect( admin_url( 'tools.php?page=wp-media-cleaner&tab=scan&saved=1' ) );
+            exit;
+        }
+
         // Handle clear log.
         if ( isset( $_POST['wmc_action'] ) && $_POST['wmc_action'] === 'clear_log' ) {
             check_admin_referer( 'wmc_log_nonce' );

@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.3.0 — 2026-03-25
+
+### Toegevoegd
+- Configureerbare uitgesloten mappen: voeg eigen submappen van uploads/ toe die de scanner moet overslaan
+- Instellingen-sectie op de Scan-pagina met tekstveld voor extra mappen
+- Standaard uitgesloten mappen worden getoond als inklapbare lijst
+- Input wordt gesanitized tegen path traversal (geen slashes, punten of speciale tekens)
+
 ## 1.2.0 — 2026-03-22
 
 ### Beveiligd
